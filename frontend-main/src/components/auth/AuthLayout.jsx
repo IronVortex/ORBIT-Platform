@@ -1,20 +1,10 @@
-import React from "react";
-import { useState, useEffect } from 'react';
+import React from 'react';
+
+import { useTheme } from "../../ThemeContext";
 import './auth.css';
 
 const AuthLayout = ({ children, title, subtitle }) => {
-  const [theme, setTheme] = useState(
-    localStorage.getItem('theme') || 'light'
-  );
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
-  };
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <div className="orbit-auth-layout">

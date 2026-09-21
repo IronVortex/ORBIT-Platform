@@ -1,105 +1,82 @@
-.profile-page-wrapper {
-  display: flex;
-  min-height: 100vh;
-  color: whitesmoke;
-  width: 100%;
-  /* flex-wrap: wrap; */
-}
-
-.user-profile-section {
-  width: 250px;
-  /* min-height: 100vh; */
-  display: flex;
-  flex-direction: column;
-  padding: 40px 10px;
-}
-
-.user-repo-section {
-  margin: 0px auto;
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.user-name {
-  /* width: 250px; */
-  margin: 10px 20px 10px 10px;
-  /* margin: 10px auto; */
-}
-
-.profile-image {
-  margin: 10px auto;
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background-color: grey;
-}
-
-.follow-btn {
-  background-color: #20272d;
-  width: 250px;
-  margin: 10px auto;
-  height: 40px;
-  border-radius: 10px;
-  color: whitesmoke;
-}
-
-.follower {
-  display: flex;
-  justify-content: center;
-  width: 250px;
-  height: 30px;
-  gap: 10px;
-  margin: 10px auto;
-}
-
-.repo-card-wrapper {
+.orbit-profile-page {
+  padding: 32px;
+  max-width: 1200px;
   margin: 0 auto;
   width: 100%;
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 20px;
-  padding: 40px 20px;
 }
 
-.repo {
-  border: 0.5px solid grey;
-  border-radius: 10px;
-  width: 400px;
-  height: 210px;
-  padding: 20px 10px;
+.orbit-profile-layout {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+}
+
+.orbit-profile-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+}
+
+.orbit-profile-avatar-large {
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--orbit-indigo) 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 80px;
+  font-weight: var(--font-weight-bold);
+  margin-bottom: 24px;
+  border: 4px solid var(--bg-surface);
+  box-shadow: var(--shadow-medium);
+}
+
+.orbit-profile-name {
+  font-size: 28px;
+  margin: 0 0 4px 0;
+  color: var(--text-primary);
+  font-weight: var(--font-weight-bold);
+}
+
+.orbit-profile-handle {
+  font-size: 20px;
+  color: var(--text-secondary);
+  margin: 0 0 16px 0;
+  font-weight: var(--font-weight-normal);
+}
+
+.orbit-profile-main {
+  flex-grow: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  gap: 40px;
 }
 
-.repo-name {
-  cursor: pointer;
-  color: #408ced;
+.orbit-profile-section-title {
   font-size: 20px;
+  margin: 0 0 20px 0;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.description {
-  color: grey;
-  font-size: 15px;
-}
-
-@media screen and (max-width: 750px) {
-  .repo {
+@media (max-width: 768px) {
+  .orbit-profile-layout {
+    flex-direction: column;
+  }
+  .orbit-profile-sidebar {
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
   }
-}
-
-@media screen and (max-width: 570px) {
-  .user-profile-section {
-    margin: auto;
+  .orbit-profile-avatar-large {
+    width: 200px;
+    height: 200px;
+    font-size: 64px;
   }
-
-  .profile-page-wrapper {
-    display: block;
-  }
-}
-
-#logout:hover {
-  border: 1px solid white;
 }

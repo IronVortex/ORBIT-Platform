@@ -1,0 +1,183 @@
+.orbit-app-shell {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+}
+
+.orbit-sidebar {
+  width: 260px;
+  background-color: var(--bg-surface);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.orbit-sidebar-header {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.orbit-brand {
+  font-size: 20px;
+  font-weight: var(--font-weight-bold);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+.orbit-brand:hover {
+  text-decoration: none;
+}
+
+.orbit-sidebar-nav {
+  flex-grow: 1;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+}
+
+.orbit-sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  font-size: 14px;
+}
+
+.orbit-sidebar-link-icon {
+  color: var(--text-muted);
+  transition: color 0.15s ease;
+}
+
+.orbit-sidebar-link:hover .orbit-sidebar-link-icon,
+.orbit-sidebar-link.active .orbit-sidebar-link-icon {
+  color: inherit;
+}
+
+.orbit-logout-btn {
+  color: var(--color-danger);
+}
+.orbit-logout-btn .orbit-sidebar-link-icon {
+  color: var(--color-danger);
+}
+.orbit-logout-btn:hover {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+  color: var(--color-danger) !important;
+}
+
+.orbit-sidebar-link:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-surface-hover);
+  text-decoration: none;
+}
+
+.orbit-sidebar-link.active {
+  color: var(--color-primary);
+  background-color: rgba(37, 99, 235, 0.1); /* light blue bg */
+}
+[data-theme='dark'] .orbit-sidebar-link.active {
+  background-color: rgba(59, 130, 246, 0.15);
+}
+
+.orbit-sidebar-footer {
+  padding: 16px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.orbit-main-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Important for flex children to prevent overflow */
+}
+
+.orbit-topbar {
+  height: 64px;
+  background-color: var(--bg-surface);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  flex-shrink: 0;
+}
+
+.orbit-topbar-search {
+  flex-grow: 1;
+  max-width: 400px;
+}
+
+.orbit-global-search {
+  width: 100%;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.orbit-global-search:focus {
+  border-color: var(--color-primary);
+}
+
+.orbit-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.orbit-notification-bell {
+  font-size: 18px;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+.orbit-notification-bell:hover {
+  color: var(--text-primary);
+}
+
+.orbit-page-content {
+  flex-grow: 1;
+  overflow-y: auto;
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .orbit-app-shell {
+    flex-direction: column;
+  }
+  .orbit-sidebar {
+    width: 100%;
+    height: auto;
+    flex-shrink: 0;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+  .orbit-sidebar-nav {
+    display: none; /* Hide full nav on mobile, would normally use a hamburger */
+  }
+  .orbit-sidebar-footer {
+    display: none;
+  }
+}
