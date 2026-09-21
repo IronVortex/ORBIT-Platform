@@ -1,0 +1,45 @@
+@import './tokens.css';
+
+:root {
+  /* Light Theme (Default) */
+  --bg-main: var(--orbit-neutral);
+  --bg-surface: #ffffff;
+  --bg-surface-hover: #f1f5f9;
+  
+  --text-primary: var(--orbit-navy);
+  --text-secondary: var(--orbit-slate);
+  --text-muted: #94a3b8;
+  --text-inverse: #ffffff;
+  
+  --border-color: var(--orbit-neutral-border);
+  --border-color-hover: #cbd5e1;
+  
+  --color-primary: var(--orbit-blue);
+  --color-primary-hover: var(--orbit-blue-hover);
+  --color-accent: var(--orbit-indigo);
+  --color-danger: var(--orbit-danger);
+  --color-danger-hover: var(--orbit-danger-hover);
+  --color-success: var(--orbit-success);
+}
+
+[data-theme='dark'] {
+  /* Dark Theme */
+  --bg-main: #0b1120;
+  --bg-surface: #111827;
+  --bg-surface-hover: #172033;
+  
+  --text-primary: var(--orbit-neutral);
+  --text-secondary: var(--orbit-slate-light);
+  --text-muted: var(--orbit-slate);
+  --text-inverse: var(--orbit-navy);
+  
+  --border-color: #1e293b;
+  --border-color-hover: #334155;
+  
+  --color-primary: var(--orbit-blue-light);
+  --color-primary-hover: var(--orbit-blue);
+  --color-accent: var(--orbit-indigo);
+  --color-danger: #f87171;
+  --color-danger-hover: var(--orbit-danger);
+  --color-success: #4ade80;
+}

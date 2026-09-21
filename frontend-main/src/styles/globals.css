@@ -1,0 +1,100 @@
+@import './theme.css';
+
+/* We apply the ORBIT classes selectively to avoid breaking existing pages that rely on global body styles.
+   Existing pages will gradually use these classes or they will be applied globally once the migration is complete.
+   For now, we define `.orbit-app` or global elements with low specificity. */
+/* Global layout reset to prevent centered wrapping of #root */
+html, body, #root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.orbit-theme {
+  font-family: var(--font-family-base);
+  color: var(--text-primary);
+  background-color: var(--bg-main);
+  line-height: var(--line-height-normal);
+  font-size: var(--text-base);
+}
+
+/* Typography Foundation */
+.orbit-theme h1, .orbit-heading-1 {
+  font-size: var(--text-4xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--spacing-md);
+  color: var(--text-primary);
+}
+
+.orbit-theme h2, .orbit-heading-2 {
+  font-size: var(--text-3xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--spacing-sm);
+  color: var(--text-primary);
+}
+
+.orbit-theme h3, .orbit-heading-3 {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--spacing-sm);
+  color: var(--text-primary);
+}
+
+.orbit-theme p, .orbit-body {
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-md);
+}
+
+.orbit-text-small {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.orbit-text-muted {
+  color: var(--text-muted);
+}
+
+/* Links */
+.orbit-theme a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color 0.15s ease-in-out;
+}
+
+.orbit-theme a:hover {
+  color: var(--color-primary-hover);
+  text-decoration: underline;
+}
+
+/* Scrollbar */
+.orbit-theme ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.orbit-theme ::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+.orbit-theme ::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: var(--radius-full);
+}
+.orbit-theme ::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Selection */
+.orbit-theme ::selection {
+  background: var(--color-primary);
+  color: var(--text-inverse);
+}
+
+/* Focus */
+.orbit-theme :focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
