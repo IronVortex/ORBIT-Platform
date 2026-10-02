@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, GitCommit, RefreshCw, Plus, Minus } from "lucide-react";
+import { useParams, useNavigate } from "react-router-dom";
+import { ArrowLeft, GitCommit, RefreshCw } from "lucide-react";
 import { getCommitDetail } from "../../api/gitApi";
 import "../repository/RepositoryDetail.css";
 

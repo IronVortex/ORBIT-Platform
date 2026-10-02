@@ -7,7 +7,7 @@ import {
   AlertCircle, RefreshCw, Terminal
 } from "lucide-react";
 import { getRepoById } from "../../api/repoApi";
-import { getRepoStatus, getBranches, getTree, getReadme, getCommits } from "../../api/gitApi";
+import { getRepoStatus, getTree, getReadme, getCommits } from "../../api/gitApi";
 import Badge from "../ui/Badge";
 import Button from "../ui/Button";
 import "./RepositoryDetail.css";
@@ -252,7 +252,7 @@ const RepositoryDetail = () => {
       {activeTab === "code" && (
         <div className="orbit-code-tab">
           {!gitStatus?.hasCommits ? (
-            <EmptyRepoGuide repo={repo} repoId={id} cloneUrl={cloneUrl} />
+            <EmptyRepoGuide repo={repo} cloneUrl={cloneUrl} />
           ) : (
             <>
               {/* Branch + actions bar */}
@@ -426,7 +426,7 @@ const RepositoryDetail = () => {
 };
 
 /* ── Empty repo onboarding ────────────────────────────── */
-function EmptyRepoGuide({ repo, repoId, cloneUrl }) {
+function EmptyRepoGuide({ repo, cloneUrl }) {
   return (
     <div className="orbit-empty-repo">
       <div className="orbit-empty-repo-icon"><Terminal size={32} /></div>

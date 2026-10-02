@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Clock, RefreshCw, GitCommit } from "lucide-react";
-import { getCommits, getBranches } from "../../api/gitApi";
-import Button from "../ui/Button";
+import { getCommits } from "../../api/gitApi";
 import "../repository/RepositoryDetail.css";
 
 function timeAgo(d) {

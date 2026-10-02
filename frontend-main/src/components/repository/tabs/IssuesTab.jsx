@@ -1,12 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { CircleDot, Plus, Tag, User, X, RefreshCw } from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
+import { CircleDot, Plus, User, X, RefreshCw } from "lucide-react";
 import { getIssues, createIssue, updateIssue } from "../../../api/issueApi";
 import Button from "../../ui/Button";
-import Badge from "../../ui/Badge";
-
-const STATUS_COLORS = { open: "success", closed: "neutral" };
-const LABEL_COLORS = ["bug", "enhancement", "question", "documentation", "help wanted"];
 
 function timeAgo(d) {
   if (!d) return "";
@@ -29,7 +24,7 @@ const IssuesTab = ({ repoId }) => {
   const [formError, setFormError] = useState("");
   const userId = localStorage.getItem("userId");
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
@@ -40,9 +35,9 @@ const IssuesTab = ({ repoId }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [repoId, statusFilter]);
 
-  useEffect(() => { load(); }, [repoId, statusFilter]);
+  useEffect(() => { load(); }, [load]);
 
   const handleCreate = async (e) => {
     e.preventDefault();

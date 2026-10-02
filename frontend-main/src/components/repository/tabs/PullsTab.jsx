@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { GitPullRequest, Plus, GitMerge, X, RefreshCw, GitBranch } from "lucide-react";
 import { getPRs, createPR, updatePR, mergePR } from "../../../api/prApi";
 import Button from "../../ui/Button";
@@ -27,7 +27,7 @@ const PullsTab = ({ repoId, branches, defaultBranch, hasCommits }) => {
   const [merging, setMerging] = useState(null);
   const userId = localStorage.getItem("userId");
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
@@ -38,9 +38,9 @@ const PullsTab = ({ repoId, branches, defaultBranch, hasCommits }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [repoId, statusFilter]);
 
-  useEffect(() => { load(); }, [repoId, statusFilter]);
+  useEffect(() => { load(); }, [load]);
   useEffect(() => { setForm(f => ({ ...f, targetBranch: defaultBranch })); }, [defaultBranch]);
 
   const handleCreate = async (e) => {

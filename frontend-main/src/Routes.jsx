@@ -13,6 +13,9 @@ import Login from "./components/auth/Login";
 import Signup from "./components/auth/Signup";
 import CreateRepository from "./components/repository/CreateRepository";
 import RepositoryDetail from "./components/repository/RepositoryDetail";
+import CommitHistory from "./components/repository/CommitHistory";
+import CommitDetail from "./components/repository/CommitDetail";
+import FileViewer from "./components/repository/FileViewer";
 
 // Foundations
 import Issues from "./components/foundations/Issues";
@@ -46,6 +49,9 @@ const ProjectRoutes = () => {
         { path: "/create", element: <CreateRepository /> },
         { path: "/profile", element: <Profile /> },
         { path: "/repo/:id", element: <RepositoryDetail /> },
+        { path: "/repo/:id/commits/:branch", element: <CommitHistory /> },
+        { path: "/repo/:id/commits/:branch/:hash", element: <CommitDetail /> },
+        { path: "/repo/:id/blob/:branch/*", element: <FileViewer /> },
         { path: "/repo/all", element: <GlobalSearch /> }, // placeholder for repo search
         { path: "/issues", element: <Issues /> },
         { path: "/pulls", element: <PullRequests /> },

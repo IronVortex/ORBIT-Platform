@@ -791,6 +791,45 @@
 .orbit-diff-remove { background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 1px 12px; }
 .orbit-diff-context { color: var(--text-secondary); padding: 1px 12px; }
 
+/* ── Commit Detail extensions ── */
+.orbit-commit-detail-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-top: 24px;
+}
+.orbit-commit-detail-icon {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+.orbit-commit-detail-header h2 {
+  margin: 0;
+  font-size: 20px;
+  color: var(--text-primary);
+  word-break: break-word;
+}
+.orbit-diff-stat {
+  margin-top: 24px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+}
+.orbit-diff-stat pre {
+  margin: 0;
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .orbit-repo-header { padding: 16px 16px 0; }
