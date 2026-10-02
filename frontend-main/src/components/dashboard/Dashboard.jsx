@@ -1,176 +1,187 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import { FolderGit2, Plus, Search, Globe, ArrowRight, BookOpen, RefreshCw } from "lucide-react";
+import { getUserRepos, getRepos } from "../../api/repoApi";
+import { getUser } from "../../api/userApi";
 import HeatMapProfile from "../user/HeatMap";
 import Button from "../ui/Button";
-import Input from "../ui/Input";
 import Badge from "../ui/Badge";
-import { FolderGit2, Plus, Search, User, Globe, ArrowRight, BookOpen } from "lucide-react";
 import "./dashboard.css";
 
+const SkeletonCard = () => (
+  <div className="orbit-skeleton-card">
+    <div className="skeleton-line" style={{ width: "60%", marginBottom: 8 }} />
+    <div className="skeleton-line short" style={{ width: "40%" }} />
+  </div>
+);
+
 const Dashboard = () => {
-  const [repositories, setRepositories] = useState([]);
+  const [repos, setRepos] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
-  const [suggestedRepositories, setSuggestedRepositories] = useState([]);
-
+  const [exploreRepos, setExploreRepos] = useState([]);
   const [userDetails, setUserDetails] = useState(null);
-
-  const [isLoadingRepos, setIsLoadingRepos] = useState(true);
-  const [isLoadingSuggested, setIsLoadingSuggested] = useState(true);
-
+  const [loadingRepos, setLoadingRepos] = useState(true);
+  const [loadingExplore, setLoadingExplore] = useState(true);
   const [repoError, setRepoError] = useState("");
-  const [suggestedError, setSuggestedError] = useState("");
+  const [exploreError, setExploreError] = useState("");
 
   const userId = localStorage.getItem("userId");
 
-  const fetchUserDetails = useCallback(async () => {
+  const fetchUser = useCallback(async () => {
     if (!userId) return;
     try {
-      const response = await axios.get(`http://localhost:3000/userProfile/${userId}`);
-      setUserDetails(response.data);
+      const res = await getUser(userId);
+      setUserDetails(res.data);
     } catch (err) {
-      console.error("Cannot fetch user details: ", err);
+      console.error("fetchUser error:", err);
     }
   }, [userId]);
 
-  const fetchRepositories = useCallback(async () => {
-    setIsLoadingRepos(true);
+  const fetchRepos = useCallback(async () => {
+    if (!userId) return;
+    setLoadingRepos(true);
     setRepoError("");
     try {
-      const response = await axios.get(`http://localhost:3000/repo/user/${userId}`);
-      setRepositories(Array.isArray(response.data.repositories) ? response.data.repositories : []);
+      const res = await getUserRepos(userId);
+      setRepos(Array.isArray(res.data?.repositories) ? res.data.repositories : []);
     } catch (err) {
-      console.error("Error while fetching repositories: ", err);
-      setRepoError("Unable to load repositories. Please check your connection and try again.");
+      console.error("fetchRepos error:", err);
+      setRepoError("Could not load repositories. Is the server running?");
     } finally {
-      setIsLoadingRepos(false);
+      setLoadingRepos(false);
     }
   }, [userId]);
 
-  const fetchSuggestedRepositories = useCallback(async () => {
-    setIsLoadingSuggested(true);
-    setSuggestedError("");
+  const fetchExplore = useCallback(async () => {
+    setLoadingExplore(true);
+    setExploreError("");
     try {
-      const response = await axios.get(`http://localhost:3000/repo/all`);
-      setSuggestedRepositories(Array.isArray(response.data) ? response.data : []);
+      const res = await getRepos();
+      setExploreRepos(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
-      console.error("Error while fetching suggested repositories: ", err);
-      setSuggestedError("Unable to load repositories to explore.");
+      console.error("fetchExplore error:", err);
+      setExploreError("Could not load explore feed.");
     } finally {
-      setIsLoadingSuggested(false);
+      setLoadingExplore(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchUserDetails();
-    fetchRepositories();
-    fetchSuggestedRepositories();
-  }, [fetchUserDetails, fetchRepositories, fetchSuggestedRepositories]);
+    fetchUser();
+    fetchRepos();
+    fetchExplore();
+  }, [fetchUser, fetchRepos, fetchExplore]);
 
-  useEffect(() => {
-    const safeRepositories = Array.isArray(repositories) ? repositories : [];
-    if (searchQuery.trim() === "") {
-      setSearchResults(safeRepositories);
-      return;
-    }
-    const filteredRepo = safeRepositories.filter((repo) =>
-      repo && repo.name && repo.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setSearchResults(filteredRepo);
-  }, [searchQuery, repositories]);
+  const filteredRepos = repos.filter((r) =>
+    !searchQuery || r.name?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const initials = userDetails?.username
-    ? userDetails.username.substring(0, 2).toUpperCase()
+    ? userDetails.username.slice(0, 2).toUpperCase()
     : "??";
 
-  return (
-    <div className="orbit-theme orbit-dashboard-page">
-      <main className="orbit-dashboard-container">
+  const timeOfDay = () => {
+    const h = new Date().getHours();
+    if (h < 12) return "Good morning";
+    if (h < 18) return "Good afternoon";
+    return "Good evening";
+  };
 
-        {/* HEADER */}
+  return (
+    <div className="orbit-dashboard-page">
+      <main className="orbit-dashboard-container">
         <header className="orbit-dashboard-header">
           <div>
             <h1>
-              Good morning, <span className="orbit-gradient-text">{userDetails?.username || "Developer"}</span>
+              {timeOfDay()},{" "}
+              <span className="orbit-gradient-text">
+                {userDetails?.username || "Developer"}
+              </span>
             </h1>
             <p className="orbit-text-muted">Your developer workspace</p>
           </div>
-          <div>
-            <Link to="/create">
-              <Button className="orbit-btn-glow" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Plus size={16} /> New Repository
-              </Button>
-            </Link>
-          </div>
+          <Link to="/create">
+            <Button style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Plus size={16} /> New Repository
+            </Button>
+          </Link>
         </header>
 
         <div className="orbit-dashboard-grid">
-          {/* MAIN WORKSPACE */}
           <div className="orbit-dashboard-main">
 
-            {/* YOUR REPOSITORIES */}
+            {/* YOUR REPOS */}
             <section className="orbit-dashboard-section">
               <div className="orbit-dashboard-section-header">
                 <h2>Your Repositories</h2>
-                <div className="orbit-search-container" style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
-                  <Search size={16} style={{ position: 'absolute', left: '12px', color: 'var(--text-muted)' }} />
-                  <Input
+                <div className="orbit-search-field">
+                  <Search size={15} className="orbit-search-icon" />
+                  <input
                     type="text"
                     value={searchQuery}
-                    placeholder="Search repositories..."
+                    placeholder="Filter repositories…"
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    style={{ paddingLeft: '36px' }}
+                    className="orbit-search-input"
                   />
                 </div>
               </div>
 
-              {isLoadingRepos ? (
+              {loadingRepos ? (
                 <div className="orbit-repo-grid">
-                  <div className="orbit-skeleton-card"><div className="skeleton-line" /><div className="skeleton-line short" /></div>
-                  <div className="orbit-skeleton-card"><div className="skeleton-line" /><div className="skeleton-line short" /></div>
+                  <SkeletonCard /><SkeletonCard />
                 </div>
               ) : repoError ? (
                 <div className="orbit-error-state">
                   <p>{repoError}</p>
-                  <Button variant="outline" onClick={fetchRepositories} style={{ marginTop: '12px' }}>Retry</Button>
+                  <Button variant="outline" onClick={fetchRepos} style={{ marginTop: 12, display: "flex", gap: 6, alignItems: "center" }}>
+                    <RefreshCw size={14} /> Retry
+                  </Button>
                 </div>
-              ) : searchResults.length === 0 ? (
+              ) : filteredRepos.length === 0 ? (
                 <div className="orbit-empty-state">
-                  <div className="orbit-empty-icon"><FolderGit2 size={32} /></div>
-                  <p>No repositories found.</p>
-                  <Link to="/create">
-                    <Button variant="primary">Create Repository</Button>
-                  </Link>
+                  <FolderGit2 size={36} style={{ color: "var(--text-muted)", marginBottom: 12 }} />
+                  <p style={{ marginBottom: 16 }}>
+                    {searchQuery ? "No matching repositories." : "No repositories yet."}
+                  </p>
+                  {!searchQuery && (
+                    <Link to="/create">
+                      <Button><Plus size={14} style={{ marginRight: 6 }} />Create Repository</Button>
+                    </Link>
+                  )}
                 </div>
               ) : (
-                <div className="orbit-repo-grid">
-                  {searchResults.map((repo) => (
-                    <Link key={repo._id} to={`/repo/${repo._id}`} className="orbit-repo-card-link">
-                      <div className="orbit-repo-card">
-                        <div className="orbit-repo-card-header">
-                          <h4 className="orbit-repo-name">
-                            <span className="orbit-repo-icon"><FolderGit2 size={16} /></span> {repo.name}
-                          </h4>
-                          <Badge variant="neutral">Public</Badge>
-                        </div>
-                        <p className="orbit-repo-desc">{repo.description || "No description provided."}</p>
-                        <div className="orbit-repo-meta">
-                          {repo.language ? (
-                            <span><span className="orbit-lang-dot" data-lang={repo.language}></span>{repo.language}</span>
-                          ) : (
-                            <span><span className="orbit-lang-dot"></span>JavaScript</span>
+                <div className="orbit-repo-list">
+                  {filteredRepos.map((repo) => (
+                    <Link key={repo._id} to={`/repo/${repo._id}`} className="orbit-repo-list-item">
+                      <div className="orbit-repo-list-main">
+                        <span className="orbit-repo-list-name">
+                          <FolderGit2 size={15} /> {repo.name}
+                        </span>
+                        <span className="orbit-repo-list-desc">
+                          {repo.description || "No description"}
+                        </span>
+                        <div className="orbit-repo-list-meta">
+                          {repo.language && (
+                            <span className="orbit-lang-tag">
+                              <span className="orbit-lang-dot" />
+                              {repo.language}
+                            </span>
                           )}
-                          <span className="orbit-repo-arrow"><ArrowRight size={16} /></span>
+                          <span className="orbit-repo-updated">
+                            Updated {new Date(repo.updatedAt).toLocaleDateString()}
+                          </span>
                         </div>
                       </div>
+                      <Badge variant={repo.visibility ? "neutral" : "warning"}>
+                        {repo.visibility ? "Public" : "Private"}
+                      </Badge>
                     </Link>
                   ))}
                 </div>
               )}
             </section>
 
-            {/* CONTRIBUTION ACTIVITY */}
+            {/* HEATMAP */}
             <section className="orbit-dashboard-section">
               <h2>Contribution Activity</h2>
               <div className="orbit-activity-card">
@@ -178,40 +189,40 @@ const Dashboard = () => {
               </div>
             </section>
 
-            {/* EXPLORE REPOSITORIES */}
+            {/* EXPLORE */}
             <section className="orbit-dashboard-section">
               <h2>Explore Repositories</h2>
-
-              {isLoadingSuggested ? (
-                <div className="orbit-repo-grid">
-                  <div className="orbit-skeleton-card"><div className="skeleton-line" /><div className="skeleton-line short" /></div>
-                </div>
-              ) : suggestedError ? (
+              {loadingExplore ? (
+                <div className="orbit-repo-grid"><SkeletonCard /><SkeletonCard /></div>
+              ) : exploreError ? (
                 <div className="orbit-error-state">
-                  <p>{suggestedError}</p>
-                  <Button variant="outline" onClick={fetchSuggestedRepositories} style={{ marginTop: '12px' }}>Retry</Button>
+                  <p>{exploreError}</p>
+                  <Button variant="outline" onClick={fetchExplore} style={{ marginTop: 12 }}>Retry</Button>
                 </div>
-              ) : suggestedRepositories.length === 0 ? (
-                <div className="orbit-empty-state" style={{ padding: '24px' }}>
-                  <p style={{ margin: 0 }}>No repositories to explore yet.</p>
+              ) : exploreRepos.length === 0 ? (
+                <div className="orbit-empty-state" style={{ padding: "20px 0" }}>
+                  <Globe size={28} style={{ color: "var(--text-muted)", marginBottom: 8 }} />
+                  <p style={{ margin: 0 }}>No public repositories to explore yet.</p>
                 </div>
               ) : (
-                <div className="orbit-repo-grid">
-                  {suggestedRepositories.slice(0, 4).map((repo) => (
-                    <Link key={repo._id} to={`/repo/${repo._id}`} className="orbit-repo-card-link">
-                      <div className="orbit-explore-card">
-                        <div className="orbit-explore-card-header">
-                          <h4 className="orbit-repo-name"><BookOpen size={16} style={{ color: 'var(--text-muted)' }} /> {repo.name}</h4>
-                          <Badge variant="neutral">Public</Badge>
-                        </div>
-                        <p className="orbit-repo-desc">{repo.description || "No description provided."}</p>
-                        <div className="orbit-repo-meta">
-                          {repo.language ? (
-                            <span><span className="orbit-lang-dot" data-lang={repo.language}></span>{repo.language}</span>
-                          ) : null}
-                          <span className="orbit-repo-arrow"><ArrowRight size={16} /></span>
-                        </div>
+                <div className="orbit-repo-list">
+                  {exploreRepos.slice(0, 6).map((repo) => (
+                    <Link key={repo._id} to={`/repo/${repo._id}`} className="orbit-repo-list-item">
+                      <div className="orbit-repo-list-main">
+                        <span className="orbit-repo-list-name">
+                          <BookOpen size={15} />
+                          {repo.owner?.username && (
+                            <span style={{ color: "var(--text-muted)", fontWeight: 400 }}>
+                              {repo.owner.username}/
+                            </span>
+                          )}
+                          {repo.name}
+                        </span>
+                        <span className="orbit-repo-list-desc">
+                          {repo.description || "No description"}
+                        </span>
                       </div>
+                      <ArrowRight size={16} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
                     </Link>
                   ))}
                 </div>
@@ -221,38 +232,35 @@ const Dashboard = () => {
 
           {/* SIDEBAR */}
           <aside className="orbit-dashboard-sidebar">
-            {/* PROFILE IDENTITY */}
             <div className="orbit-profile-identity">
               <div className="orbit-profile-avatar">{initials}</div>
               <div className="orbit-profile-info">
-                <h4>{userDetails?.username || "Developer"}</h4>
-                <p>Developer</p>
+                <strong>{userDetails?.username || "Developer"}</strong>
+                <span>{userDetails?.email || ""}</span>
               </div>
-              <Link to="/profile" className="orbit-profile-link" aria-label="View Profile">
+              <Link to="/profile" className="orbit-profile-link">
                 <ArrowRight size={16} />
               </Link>
             </div>
 
-            {/* QUICK ACTIONS */}
             <div className="orbit-quick-actions">
               <h4>Quick Actions</h4>
               <ul>
-                <li><Link to="/create"><Plus size={16} /> New Repository</Link></li>
-                <li><Link to="/repo/all"><Globe size={16} /> Explore</Link></li>
-                <li><Link to="/profile"><User size={16} /> Profile</Link></li>
+                <li><Link to="/create"><Plus size={14} /> New Repository</Link></li>
+                <li><Link to="/repo/all"><Globe size={14} /> Explore</Link></li>
+                <li><Link to="/issues"><FolderGit2 size={14} /> Issues</Link></li>
               </ul>
             </div>
 
-            {/* STATS CARD */}
             <div className="orbit-stats-card">
               <h4>Overview</h4>
               <div className="orbit-stat-row">
                 <span className="orbit-stat-label">Repositories</span>
-                <span className="orbit-stat-value">{repositories.length}</span>
+                <span className="orbit-stat-value">{repos.length}</span>
               </div>
               <div className="orbit-stat-row">
-                <span className="orbit-stat-label">Explore pool</span>
-                <span className="orbit-stat-value">{suggestedRepositories.length}</span>
+                <span className="orbit-stat-label">Public repos</span>
+                <span className="orbit-stat-value">{exploreRepos.length}</span>
               </div>
             </div>
           </aside>

@@ -1,171 +1,158 @@
 const mongoose = require("mongoose");
 const Repository = require("../models/repoModel");
 const User = require("../models/userModel");
-const Issue = require("../models/issueModel");
+const gitService = require("../services/gitService");
 
 async function createRepository(req, res) {
-  const { owner, name, issues, content, description, visibility } = req.body;
+  const { name, description, visibility, language } = req.body;
+  const owner = req.user.id; // from JWT
 
   try {
     if (!name || !String(name).trim()) {
-      return res.status(400).json({ error: "Repository name is required!" });
-    }
-
-    if (!mongoose.Types.ObjectId.isValid(owner)) {
-      return res.status(400).json({ error: "Invalid User ID!" });
+      return res.status(400).json({ error: "Repository name is required." });
     }
 
     const normalizedName = String(name).trim();
-    const existingRepository = await Repository.findOne({
+
+    // Validate name: alphanumeric, hyphens, underscores, dots
+    if (!/^[a-zA-Z0-9._-]+$/.test(normalizedName)) {
+      return res.status(400).json({ error: "Repository name contains invalid characters." });
+    }
+
+    const existing = await Repository.findOne({
       owner,
       name: { $regex: new RegExp(`^${normalizedName}$`, "i") },
     });
-
-    if (existingRepository) {
-      return res.status(409).json({ error: "Repository with this name already exists for this user." });
+    if (existing) {
+      return res.status(409).json({ error: "A repository with this name already exists." });
     }
 
     const newRepository = new Repository({
       name: normalizedName,
       description,
-      visibility,
+      visibility: visibility !== false,
+      language,
       owner,
-      content: Array.isArray(content) ? content : [],
-      issues: Array.isArray(issues) ? issues : [],
+      content: [],
+      issues: [],
+      gitInitialized: false,
     });
 
     const result = await newRepository.save();
 
+    // Initialize the bare Git repo
+    try {
+      await gitService.initBareRepo(result._id.toString());
+      result.gitInitialized = true;
+      await result.save();
+    } catch (gitErr) {
+      console.error("Git init error (non-fatal):", gitErr.message);
+    }
+
     res.status(201).json({
       message: "Repository created!",
-      repositoryID: result._id,
+      repositoryId: result._id,
+      repository: result,
     });
   } catch (err) {
-    console.error("Error during repository creation : ", err.message);
+    console.error("createRepository error:", err.message);
     res.status(500).json({ error: "Server error" });
   }
 }
 
 async function getAllRepositories(req, res) {
   try {
-    const repositories = await Repository.find({})
-      .populate("owner")
-      .populate("issues");
-
-    res.json(repositories);
+    const repos = await Repository.find({ visibility: true })
+      .populate("owner", "username email")
+      .sort({ updatedAt: -1 });
+    res.json(repos);
   } catch (err) {
-    console.error("Error during fetching repositories : ", err.message);
-    res.status(500).send("Server error");
+    console.error("getAllRepositories error:", err.message);
+    res.status(500).json({ error: "Server error" });
   }
 }
 
 async function fetchRepositoryById(req, res) {
   const { id } = req.params;
   try {
-    const repository = await Repository.find({ _id: id })
-      .populate("owner")
+    const repo = await Repository.findById(id)
+      .populate("owner", "username email")
       .populate("issues");
-
-    res.json(repository);
+    if (!repo) return res.status(404).json({ error: "Repository not found." });
+    res.json(repo);
   } catch (err) {
-    console.error("Error during fetching repository : ", err.message);
-    res.status(500).send("Server error");
+    console.error("fetchRepositoryById error:", err.message);
+    res.status(500).json({ error: "Server error" });
   }
 }
 
 async function fetchRepositoryByName(req, res) {
   const { name } = req.params;
   try {
-    const repository = await Repository.find({ name })
-      .populate("owner")
+    const repos = await Repository.find({ name })
+      .populate("owner", "username email")
       .populate("issues");
-
-    res.json(repository);
+    res.json(repos);
   } catch (err) {
-    console.error("Error during fetching repository : ", err.message);
-    res.status(500).send("Server error");
+    console.error("fetchRepositoryByName error:", err.message);
+    res.status(500).json({ error: "Server error" });
   }
 }
 
 async function fetchRepositoriesForCurrentUser(req, res) {
-  console.log(req.params);
   const { userID } = req.params;
-
   try {
-    const repositories = await Repository.find({ owner: userID });
-
-    console.log(repositories);
-
-    res.json({
-      message: "Repositories found!",
-      repositories,
-    });
+    const repos = await Repository.find({ owner: userID }).sort({ updatedAt: -1 });
+    res.json({ message: "Repositories found.", repositories: repos });
   } catch (err) {
-    console.error("Error during fetching user repositories : ", err.message);
-    res.status(500).send("Server error");
+    console.error("fetchRepositoriesForCurrentUser error:", err.message);
+    res.status(500).json({ error: "Server error" });
   }
 }
 
 async function updateRepositoryById(req, res) {
   const { id } = req.params;
-  const { content, description } = req.body;
+  const { description, language, defaultBranch } = req.body;
 
   try {
-    const repository = await Repository.findById(id);
-    if (!repository) {
-      return res.status(404).json({ error: "Repository not found!" });
-    }
+    const repo = await Repository.findById(id);
+    if (!repo) return res.status(404).json({ error: "Repository not found." });
 
-    repository.content.push(content);
-    repository.description = description;
+    if (description !== undefined) repo.description = description;
+    if (language !== undefined) repo.language = language;
+    if (defaultBranch !== undefined) repo.defaultBranch = defaultBranch;
 
-    const updatedRepository = await repository.save();
-
-    res.json({
-      message: "Repository updated successfully!",
-      repository: updatedRepository,
-    });
+    const updated = await repo.save();
+    res.json({ message: "Repository updated.", repository: updated });
   } catch (err) {
-    console.error("Error during updating repository : ", err.message);
-    res.status(500).send("Server error");
+    console.error("updateRepositoryById error:", err.message);
+    res.status(500).json({ error: "Server error" });
   }
 }
 
 async function toggleVisibilityById(req, res) {
   const { id } = req.params;
-
   try {
-    const repository = await Repository.findById(id);
-    if (!repository) {
-      return res.status(404).json({ error: "Repository not found!" });
-    }
-
-    repository.visibility = !repository.visibility;
-
-    const updatedRepository = await repository.save();
-
-    res.json({
-      message: "Repository visibility toggled successfully!",
-      repository: updatedRepository,
-    });
+    const repo = await Repository.findById(id);
+    if (!repo) return res.status(404).json({ error: "Repository not found." });
+    repo.visibility = !repo.visibility;
+    const updated = await repo.save();
+    res.json({ message: "Visibility updated.", repository: updated });
   } catch (err) {
-    console.error("Error during toggling visibility : ", err.message);
-    res.status(500).send("Server error");
+    console.error("toggleVisibilityById error:", err.message);
+    res.status(500).json({ error: "Server error" });
   }
 }
 
 async function deleteRepositoryById(req, res) {
   const { id } = req.params;
   try {
-    const repository = await Repository.findByIdAndDelete(id);
-    if (!repository) {
-      return res.status(404).json({ error: "Repository not found!" });
-    }
-
-    res.json({ message: "Repository deleted successfully!" });
+    const repo = await Repository.findByIdAndDelete(id);
+    if (!repo) return res.status(404).json({ error: "Repository not found." });
+    res.json({ message: "Repository deleted." });
   } catch (err) {
-    console.error("Error during deleting repository : ", err.message);
-    res.status(500).send("Server error");
+    console.error("deleteRepositoryById error:", err.message);
+    res.status(500).json({ error: "Server error" });
   }
 }
 
